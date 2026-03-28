@@ -1,0 +1,5 @@
+{
+  "name": "Woodex E-Quotation V1",
+  "description": "A high-fidelity, mobile-responsive quotation builder for Woodex Furniture with Google Sheets integration, offline drafting, and automated ID generation.",
+  "requestFramePermissions": []
+}
