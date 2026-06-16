@@ -1,12 +1,99 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  /* Ultra-clean neutral palette */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f9fafb;
+  --color-bg-tertiary: #f3f4f6;
+  --color-border-light: #e5e7eb;
+  --color-border-medium: #d1d5db;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+  
+  /* Dark mode neutrals */
+  --color-dark-bg-primary: #0f1117;
+  --color-dark-bg-secondary: #161b22;
+  --color-dark-bg-tertiary: #21262d;
+  --color-dark-border: #30363d;
+  --color-dark-text-primary: #c9d1d9;
+  --color-dark-text-secondary: #8b949e;
+  
+  /* Premium accent colors */
+  --color-accent-primary: #2563eb;
+  --color-accent-primary-light: #3b82f6;
+  --color-accent-primary-dark: #1d4ed8;
+  --color-accent-secondary: #059669;
+  --color-accent-warning: #f59e0b;
+  --color-accent-danger: #dc2626;
+  --color-accent-success: #10b981;
+  
+  /* Status badge colors */
+  --color-status-draft: #6b7280;
+  --color-status-sent: #3b82f6;
+  --color-status-approved: #10b981;
+  --color-status-rejected: #ef4444;
+  --color-status-invoiced: #8b5cf6;
+  --color-status-paid: #059669;
+  --color-status-unpaid: #f59e0b;
+  
+  --radius-sm: 4px;
+  --radius-base: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
 }
 
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+/* Monospace for financial data and IDs */
+.font-mono-data {
+  font-family: var(--font-mono);
+  letter-spacing: 0.01em;
+}
+
+/* Premium container shadows */
+.shadow-premium {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+}
+
+.shadow-premium-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-premium-lg {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Grid borders - ultra-subtle */
+.grid-border {
+  border-color: var(--color-border-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: var(--color-dark-bg-primary);
+    color: var(--color-dark-text-primary);
+  }
+  
+  .grid-border {
+    border-color: var(--color-dark-border);
+  }
 }
