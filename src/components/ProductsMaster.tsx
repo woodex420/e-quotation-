@@ -403,6 +403,4 @@ export default function ProductsMaster() {
     </div>
   );
 }
-
-export default ProductsMaster;
 }
