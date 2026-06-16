@@ -341,3 +341,5 @@ function StatCard({ label, value, icon: Icon, color }: StatCardProps) {
     </div>
   );
 }
+
+export default QuotationsDashboard;
