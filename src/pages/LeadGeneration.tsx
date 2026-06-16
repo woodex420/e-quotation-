@@ -1,15 +1,64 @@
 import React, { useState } from 'react';
-import { Plus, Search, Filter, MoreVertical } from 'lucide-react';
+import { Plus, Search, Filter, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import Modal from '../components/Modal';
+import ConfirmDialog from '../components/ConfirmDialog';
+import LeadForm from '../components/LeadForm';
+import { toast } from 'sonner';
 
 export default function LeadGeneration() {
   const [searchTerm, setSearchTerm] = useState('');
-
-  const leads = [
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [leads, setLeads] = useState([
     { id: 1, date: '30/03/2026', company: 'Rafi Group', name: 'Hassan', contact: '333 4405830', designation: 'manager', location: 'Lahore', source: 'NEW LEAD', category: 'INTERIOR', assignee: 'Nabeel', status: 'NEW LEADS', meeting: '-' },
     { id: 2, date: '30/03/2026', company: 'nabeel', name: 'Hassan', contact: '333 4405830', designation: 'manager', location: 'Eitihad Town', source: 'NEW LEAD', category: 'FURNITURE', assignee: 'Nabeel', status: 'MEETING', meeting: '2026-03-25' },
     { id: 3, date: '10/01/2025', company: 'Green Brain', name: 'Hassan', contact: '333 4405830', designation: 'Ceo', location: 'Eitihad Town', source: 'CLIENT', category: 'FURNITURE', assignee: 'Abdullah', status: 'DONE', meeting: '2026-03-30' },
     { id: 4, date: '17/01/2025', company: 'Total Parco', name: 'Norman Ahmad', contact: '304 010137', designation: 'Procurement', location: 'Kot ADDU Multan', source: 'NEW LEAD', category: 'FURNITURE', assignee: 'Abdullah', status: 'DONE', meeting: '-' },
-  ];
+  ]);
+
+  const handleAddLead = (data: any) => {
+    const newLead = {
+      id: Math.max(...leads.map(l => l.id), 0) + 1,
+      date: new Date().toLocaleDateString('en-GB'),
+      company: data.companyName,
+      name: data.contactName,
+      contact: data.phone,
+      designation: data.designation,
+      location: data.location,
+      source: data.leadSource || 'NEW LEAD',
+      category: data.category,
+      assignee: 'Unassigned',
+      status: 'NEW LEADS',
+      meeting: '-',
+    };
+    setLeads([...leads, newLead]);
+    setIsModalOpen(false);
+    toast.success('Lead added successfully');
+  };
+
+  const handleEditLead = (lead: any) => {
+    setSelectedLead(lead);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteLead = (lead: any) => {
+    setSelectedLead(lead);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    setLeads(leads.filter(l => l.id !== selectedLead.id));
+    setIsDeleteDialogOpen(false);
+    setSelectedLead(null);
+    toast.success('Lead deleted successfully');
+  };
+
+  const filteredLeads = leads.filter(l =>
+    l.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    l.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    l.contact.includes(searchTerm)
+  );
 
   const metrics = [
     { label: 'NEW LEAD', value: '1' },
@@ -44,7 +93,12 @@ export default function LeadGeneration() {
             <h1 className="text-4xl font-bold">Lead Generation</h1>
             <p className="text-gray-400">Manage pipeline and track client database.</p>
           </div>
-          <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
+          <button 
+            onClick={() => {
+              setSelectedLead(null);
+              setIsModalOpen(true);
+            }}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
             <Plus size={20} />
             Add Lead
           </button>
@@ -110,7 +164,7 @@ export default function LeadGeneration() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {leads.map((lead) => (
+                {filteredLeads.map((lead) => (
                 <tr key={lead.id} className="hover:bg-gray-800 transition-colors">
                   <td className="px-6 py-4 text-sm text-gray-300">{lead.id}</td>
                   <td className="px-6 py-4 text-sm text-gray-300">{lead.date}</td>
@@ -136,16 +190,53 @@ export default function LeadGeneration() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-300">{lead.meeting}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <button className="text-gray-400 hover:text-white transition-colors">
-                      <MoreVertical size={18} />
-                    </button>
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleEditLead(lead)}
+                        className="text-blue-400 hover:text-blue-300 transition-colors">
+                        <Edit size={18} />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteLead(lead)}
+                        className="text-red-400 hover:text-red-300 transition-colors">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
+        {/* Add/Edit Modal */}
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedLead(null);
+          }}
+          title={selectedLead ? 'Edit Lead' : 'Add New Lead'}
+          size="lg"
+        >
+          <LeadForm 
+            onSubmit={handleAddLead}
+            initialData={selectedLead}
+          />
+        </Modal>
+
+        {/* Delete Confirmation */}
+        <ConfirmDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => setIsDeleteDialogOpen(false)}
+          onConfirm={confirmDelete}
+          title="Delete Lead"
+          message={`Are you sure you want to delete the lead from "${selectedLead?.company}"? This action cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          isDangerous={true}
+        />
       </div>
     </div>
   );

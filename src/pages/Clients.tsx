@@ -1,14 +1,61 @@
 import React, { useState } from 'react';
-import { Plus, Search, Filter, MoreVertical, Phone, Mail } from 'lucide-react';
+import { Plus, Search, Filter, MoreVertical, Phone, Mail, Edit, Trash2 } from 'lucide-react';
+import Modal from '../components/Modal';
+import ConfirmDialog from '../components/ConfirmDialog';
+import ClientForm from '../components/ClientForm';
+import { toast } from 'sonner';
 
 export default function Clients() {
   const [searchTerm, setSearchTerm] = useState('');
-
-  const clients = [
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [clients, setClients] = useState([
     { id: 1, initial: 'B', name: 'Black Ibex', code: 'C1', phone: '+923134227744', email: 'info@blackibex.com', location: 'Bahawalpur, Punjab', status: ['OP', '1A'], lastActivity: '28/03/2028', spent: 'Rs 230,000' },
     { id: 2, initial: 'Z', name: 'Zainab Tower', code: 'C2', phone: '+923224000768', email: 'info@zainab.pk', location: 'Lahore, Pakistan', status: ['OP', '0A'], lastActivity: 'NO ACTIVITY', spent: 'Rs 450,000' },
     { id: 3, initial: 'a', name: 'ahmad', code: 'C177649', phone: '03213638360', email: 'new@gmaik.cd,', location: 'lahore pakistan', status: ['OP', '1A'], lastActivity: '31/03/2028', spent: 'Rs 0' },
-  ];
+  ]);
+
+  const handleAddClient = (data: any) => {
+    const newClient = {
+      id: Math.max(...clients.map(c => c.id), 0) + 1,
+      initial: data.name.charAt(0),
+      name: data.name,
+      code: `C${Math.floor(Math.random() * 999999)}`,
+      phone: data.phone,
+      email: data.email,
+      location: data.address || 'Not specified',
+      status: ['NEW'],
+      lastActivity: 'Just now',
+      spent: 'Rs 0',
+    };
+    setClients([...clients, newClient]);
+    setIsModalOpen(false);
+    toast.success('Client added successfully');
+  };
+
+  const handleEditClient = (client: any) => {
+    setSelectedClient(client);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteClient = (client: any) => {
+    setSelectedClient(client);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    setClients(clients.filter(c => c.id !== selectedClient.id));
+    setIsDeleteDialogOpen(false);
+    setSelectedClient(null);
+    toast.success('Client deleted successfully');
+  };
+
+  const filteredClients = clients.filter(c =>
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.phone.includes(searchTerm)
+  );
 
   const getStatusColor = (status: string) => {
     if (status === 'OP') return 'bg-orange-600';
@@ -26,7 +73,12 @@ export default function Clients() {
             <h1 className="text-4xl font-bold">Client Database</h1>
             <p className="text-gray-400">Manage your customer relationships and track quotation status.</p>
           </div>
-          <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
+          <button 
+            onClick={() => {
+              setSelectedClient(null);
+              setIsModalOpen(true);
+            }}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
             <Plus size={20} />
             ADD CLIENT
           </button>
@@ -82,7 +134,7 @@ export default function Clients() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {clients.map((client) => (
+              {filteredClients.map((client) => (
                 <tr key={client.id} className="hover:bg-gray-800 transition-colors">
                   <td className="px-6 py-4">
                     <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white font-bold text-sm">
@@ -117,14 +169,53 @@ export default function Clients() {
                   </td>
                   <td className="px-6 py-4 text-gray-300">{client.lastActivity}</td>
                   <td className="px-6 py-4 text-cyan-400 font-bold">{client.spent}</td>
-                  <td className="px-6 py-4 text-gray-400 hover:text-white transition-colors cursor-pointer">
-                    <MoreVertical size={18} />
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleEditClient(client)}
+                        className="text-blue-400 hover:text-blue-300 transition-colors">
+                        <Edit size={18} />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteClient(client)}
+                        className="text-red-400 hover:text-red-300 transition-colors">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
+        {/* Add/Edit Modal */}
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedClient(null);
+          }}
+          title={selectedClient ? 'Edit Client' : 'Add New Client'}
+          size="md"
+        >
+          <ClientForm 
+            onSubmit={handleAddClient}
+            initialData={selectedClient}
+          />
+        </Modal>
+
+        {/* Delete Confirmation */}
+        <ConfirmDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => setIsDeleteDialogOpen(false)}
+          onConfirm={confirmDelete}
+          title="Delete Client"
+          message={`Are you sure you want to delete "${selectedClient?.name}"? This action cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          isDangerous={true}
+        />
       </div>
     </div>
   );
